@@ -29,7 +29,7 @@ def write_data(ans, name):
     f.close()
 
 def cosine_similarity(v1, v2):
-    return simil
+    return sm
 
 def single_cluster(data):
 
