@@ -27,7 +27,10 @@ def write_data(ans, name):
 		f.write("".join(map(str, ans[i]))+"\n")
 	
     f.close()
-					
+
+def cosine_similarity(v1, v2):
+    
+
 def single_cluster(data):
 
     
