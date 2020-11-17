@@ -21,7 +21,16 @@ class DisjointSet:
                 self.data[i] = x
             elif x > y and self.find(i) == x:
                 self.data[i] = y
+    
+    def get_list(self, num):
+        pn = self.find(num)
+        arr = []
+        for i in range(self.size):
+            if pn == self.data[i]:
+                arr.append(i)
 
+        return arr 
+    
     def length(self):
         return len(set(self.data))
 
@@ -128,7 +137,13 @@ def complete_cluster(data):
     return ans, span
 
 def average_cluster(data):
-    table = copy.deepcopy(data)
+    table = [[-10 for x in range(len(data))] for y in range(len(data))]
+    for i in range(len(data)):
+        for j in range(len(data)):
+            if i == j:
+                continue
+            table[i][j] = cosine_similarity(data[i], data[j])
+
     tot = len(data)
     span = [1, 1]
     ans = DisjointSet(tot)
@@ -144,15 +159,25 @@ def average_cluster(data):
         span[1] = max_val
         if ans.length() == 3:
             break
-    
-        ans.union(item1, item2)
         
+        ans.union(item1, item2)
+
         table[item2][item1] = -10
         table[item1][item2] = -10
         for i in range(len(table)):
-            if item1 != i:
-                table[item1][i] = min(table[item1][i], table[item2][i])
+            if item1 != i and table[item1][i] != -10:
+                if ans.find(item1) == ans.find(i):
+                    continue
+                li1 = ans.get_list(item1)
+                li2 = ans.get_list(i)
+                
+                table[item1][i] = 0
+                for j in li1:
+                    for k in li2:
+                        table[item1][i] += cosine_similarity(data[j], data[k])
+                table[item1][i] = table[item1][i] / (len(li1)*len(li2))
                 table[i][item1] = table[item1][i]
+            
             table[item2][i] = -10
             table[i][item2] = -10
 
@@ -194,7 +219,7 @@ def clustered(data, name):
             if i == j:
                 continue
             table[i][j] = cosine_similarity(data[i], data[j])
-
+          
     ans, span = single_cluster(table)
     info = indexToVertex(ans, data)
     write_data(name, info, span, "single")
@@ -202,17 +227,17 @@ def clustered(data, name):
     ans, span = complete_cluster(table)
     info = indexToVertex(ans, data)
     write_data(name, info, span, "complete")
-    '''
-    ans, span = average_cluster(table)
+    
+    ans, span = average_cluster(data)
     info = indexToVertex(ans, data)    
     write_data(name, info, span, "average")
-    '''
+    
 if __name__ == "__main__":
     print("Coordinate_Practice... ", end="")
     data, name = get_data("CoordinatePlane_practice.txt")
     clustered(data, name)
     print("Done")
-
+    
     print("Coordinate_1... ", end="")
     data, name = get_data("CoordinatePlane_1.txt")
     clustered(data, name)
